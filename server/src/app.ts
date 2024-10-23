@@ -9,15 +9,15 @@ import mongoose from "mongoose";
 
 const app = express();
 
-mongoose
-  .connect(process.env.MONGODB_URI!)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error(err));
+// mongoose
+//   .connect(process.env.MONGODB_URI!)
+//   .then(() => console.log("Connected to MongoDB"))
+//   .catch((err) => console.error(err));
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
+    // origin: process.env.CLIENT_URL,
+    // credentials: true,
   })
 );
 
