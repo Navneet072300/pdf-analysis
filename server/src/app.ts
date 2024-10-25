@@ -14,7 +14,7 @@ import "./config/passport";
 const app = express();
 
 import authRoute from "./routes/auth";
-// import contractsRoute from "./routes/contracts";
+import contractsRoute from "./routes/contracts";
 // import paymentsRoute from "./routes/payments";
 // import { handleWebhook } from "./controllers/payment.controller";
 
@@ -25,8 +25,8 @@ mongoose
 
 app.use(
   cors({
-    // origin: process.env.CLIENT_URL,
-    // credentials: true,
+    origin: process.env.CLIENT_URL,
+    credentials: true,
   })
 );
 
@@ -59,7 +59,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/auth", authRoute);
-// app.use("/contracts", contractsRoute);
+app.use("/contracts", contractsRoute);
 // app.use("/payments", paymentsRoute);
 
 const PORT = 8080;

@@ -1,10 +1,15 @@
 import redis from "../config/redis";
-import { getDocument } from "pdfjs-dist";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const AI_MODEL = "gemini-pro";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const aiModel = genAI.getGenerativeModel({ model: AI_MODEL });
+
+// Use dynamic import for ES modules like pdfjs-dist
+const loadPdfJs = async () => {
+  const pdfjsLib = await import("pdfjs-dist");
+  return pdfjsLib;
+};
 
 export const extractTextFromPDF = async (fileKey: string) => {
   try {
@@ -17,7 +22,7 @@ export const extractTextFromPDF = async (fileKey: string) => {
     if (Buffer.isBuffer(fileData)) {
       fileBuffer = new Uint8Array(fileData);
     } else if (typeof fileData === "object" && fileData !== null) {
-      // check if the the object has the expected structure
+      // Check if the object has the expected structure
       const bufferData = fileData as { type?: string; data?: number[] };
       if (bufferData.type === "Buffer" && Array.isArray(bufferData.data)) {
         fileBuffer = new Uint8Array(bufferData.data);
@@ -28,7 +33,10 @@ export const extractTextFromPDF = async (fileKey: string) => {
       throw new Error("Invalid file data");
     }
 
-    const pdf = await getDocument({ data: fileBuffer }).promise;
+    // Dynamically load pdfjs-dist
+    const pdfjsLib = await loadPdfJs();
+    const pdf = await pdfjsLib.getDocument({ data: fileBuffer }).promise;
+
     let text = "";
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
@@ -133,7 +141,7 @@ export const analyzeContractWithAI = async (
   const response = await results.response;
   let text = response.text();
 
-  // remove any markdown formatting
+  // Remove any markdown formatting
   text = text.replace(/```json\n?|\n?```/g, "").trim();
 
   try {
@@ -183,7 +191,7 @@ export const analyzeContractWithAI = async (
     });
   }
 
-  //Extact opportunities
+  // Extract opportunities
   const opportunitiesMatch = text.match(/"opportunities"\s*:\s*\[([\s\S]*?)\]/);
   if (opportunitiesMatch) {
     fallbackAnalysis.opportunities = opportunitiesMatch[1]
@@ -200,12 +208,6 @@ export const analyzeContractWithAI = async (
           explanation: explanationMatch ? explanationMatch[1] : "Unknown",
         };
       });
-  }
-
-  // Extract summary
-  const summaryMatch = text.match(/"summary"\s*:\s*"([^"]*)"/);
-  if (summaryMatch) {
-    fallbackAnalysis.summary = summaryMatch[1];
   }
 
   return fallbackAnalysis;
