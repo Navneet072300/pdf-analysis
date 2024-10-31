@@ -15,8 +15,8 @@ const app = express();
 
 import authRoute from "./routes/auth";
 import contractsRoute from "./routes/contracts";
-// import paymentsRoute from "./routes/payments";
-// import { handleWebhook } from "./controllers/payment.controller";
+import paymentsRoute from "./routes/payments";
+import { handleWebhook } from "./controllers/payment.controller";
 
 mongoose
   .connect(process.env.MONGODB_URI!)
@@ -25,7 +25,7 @@ mongoose
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: process.env.CLIENT_URl,
     credentials: true,
   })
 );
@@ -33,11 +33,11 @@ app.use(
 app.use(helmet());
 app.use(morgan("dev"));
 
-// app.post(
-//   "/payments/webhook",
-//   express.raw({ type: "application/json" }),
-//   handleWebhook
-// );
+app.post(
+  "/payments/webhook",
+  express.raw({ type: "application/json" }),
+  handleWebhook
+);
 
 app.use(express.json());
 
